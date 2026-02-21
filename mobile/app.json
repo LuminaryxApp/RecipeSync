@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "RecipeSync",
+    "slug": "recipesync",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#FF6B35",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.recipesync.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FF6B35"
+      },
+      "package": "com.recipesync.app"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "RecipeSync needs access to your photos to add images to recipe steps."
+        }
+      ]
+    ]
+  }
+}

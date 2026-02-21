@@ -15,7 +15,7 @@ import { useYjsCollaboration } from '../hooks/useYjsCollaboration';
 import { usePresence } from '../hooks/usePresence';
 import PresenceBar from '../components/PresenceBar';
 import { uploadStepImage } from '../api/images';
-import { launchImageLibrary } from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 import * as Y from 'yjs';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'RecipeEditor'>;
@@ -154,11 +154,11 @@ export default function RecipeEditorScreen({ route, navigation }: Props) {
 
   const handleAddStepImage = useCallback(
     async (index: number) => {
-      const result = await launchImageLibrary({
-        mediaType: 'photo',
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
         quality: 0.8,
       });
-      if (result.assets?.[0]?.uri) {
+      if (!result.canceled && result.assets?.[0]?.uri) {
         try {
           const { url } = await uploadStepImage(
             recipeId,
