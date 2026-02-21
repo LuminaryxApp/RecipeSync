@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.js.map
+
+# Environment files (NEVER commit these)
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test
+coverage/
+
+# React Native
+mobile/ios/Pods/
+mobile/android/.gradle/
+mobile/android/app/build/
+*.apk
+*.ipa

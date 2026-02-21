@@ -1,0 +1,74 @@
+version: "3.8"
+
+services:
+  # ─── PostgreSQL ───────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: recipesync-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-recipesync}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-recipesync}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"   # 5433 to avoid conflict with any existing PG
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recipesync"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: recipesync-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redisdata:/data
+    ports:
+      - "127.0.0.1:6380:6379"   # 6380 to avoid conflict with any existing Redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── RecipeSync API Server ────────────────────────────────
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: recipesync-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-recipesync}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-recipesync}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in .env}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
+    ports:
+      - "127.0.0.1:3001:3000"   # 3001 externally to avoid conflict with existing apps
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  pgdata:
+  redisdata:
