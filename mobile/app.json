@@ -27,7 +27,9 @@
         {
           "photosPermission": "RecipeSync needs access to your photos to add images to recipe steps."
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font"
     ]
   }
 }
